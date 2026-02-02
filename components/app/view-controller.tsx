@@ -5,8 +5,9 @@ import { useSessionContext } from '@livekit/components-react';
 import type { AppConfig } from '@/app-config';
 import { SessionView } from '@/components/app/session-view';
 import { WelcomeView } from '@/components/app/welcome-view';
+import { LanguageCode } from './language-selector';
 
-const MotionWelcomeView = motion.create(WelcomeView);
+//const MotionWelcomeView = motion.create(WelcomeView);
 const MotionSessionView = motion.create(SessionView);
 
 const VIEW_MOTION_PROPS = {
@@ -29,21 +30,29 @@ const VIEW_MOTION_PROPS = {
 
 interface ViewControllerProps {
   appConfig: AppConfig;
+  selectedLanguage: LanguageCode;
+  setSelectedLanguage: (language: LanguageCode) => void;
 }
 
-export function ViewController({ appConfig }: ViewControllerProps) {
+export function ViewController({
+  appConfig,
+  selectedLanguage,
+  setSelectedLanguage,
+}: ViewControllerProps) {
   const { isConnected, start } = useSessionContext();
 
   return (
     <AnimatePresence mode="wait">
       {/* Welcome view */}
       {!isConnected && (
-        <MotionWelcomeView
-          key="welcome"
-          {...VIEW_MOTION_PROPS}
-          startButtonText={appConfig.startButtonText}
-          onStartCall={start}
-        />
+        <motion.div key="welcome" {...VIEW_MOTION_PROPS}>
+          <WelcomeView
+            startButtonText={appConfig.startButtonText}
+            onStartCall={start}
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={setSelectedLanguage}
+          />
+        </motion.div>
       )}
       {/* Session view */}
       {isConnected && (

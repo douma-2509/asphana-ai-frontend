@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { LanguageCode, LanguageSelector } from './language-selector';
 
 function WelcomeImage() {
   return (
@@ -21,11 +22,15 @@ function WelcomeImage() {
 interface WelcomeViewProps {
   startButtonText: string;
   onStartCall: () => void;
+  selectedLanguage: LanguageCode;
+  onLanguageChange: (language: LanguageCode) => void;
 }
 
 export const WelcomeView = ({
   startButtonText,
   onStartCall,
+  selectedLanguage,
+  onLanguageChange,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
   return (
@@ -37,29 +42,17 @@ export const WelcomeView = ({
           Chat live with your voice AI agent
         </p>
 
-        <Button
-          size="lg"
-          onClick={onStartCall}
-          className="mt-6 w-64 rounded-full font-mono text-xs font-bold tracking-wider uppercase"
-        >
-          {startButtonText}
-        </Button>
-      </section>
-
-      <div className="fixed bottom-5 left-0 flex w-full items-center justify-center">
-        <p className="text-muted-foreground max-w-prose pt-1 text-xs leading-5 font-normal text-pretty md:text-sm">
-          Need help getting set up? Check out the{' '}
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://docs.livekit.io/agents/start/voice-ai/"
-            className="underline"
+        <div className="mt-6 w-72 space-y-4">
+          <LanguageSelector value={selectedLanguage} onChange={onLanguageChange} />
+          <Button
+            size="lg"
+            onClick={onStartCall}
+            className="mt-6 w-64 rounded-full font-mono text-xs font-bold tracking-wider uppercase"
           >
-            Voice AI quickstart
-          </a>
-          .
-        </p>
-      </div>
+            {startButtonText}
+          </Button>
+        </div>
+      </section>
     </div>
   );
 };
