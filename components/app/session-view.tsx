@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { RoomEvent } from 'livekit-client';
 import { AnimatePresence, motion } from 'motion/react';
-import { useSessionContext, useSessionMessages } from '@livekit/components-react';
+import { useRoomContext, useSessionContext, useSessionMessages } from '@livekit/components-react';
 import type { AppConfig } from '@/app-config';
 import {
   AgentControlBar,
   type AgentControlBarControls,
 } from '@/components/agents-ui/agent-control-bar';
 import { ChatTranscript } from '@/components/app/chat-transcript';
+import type { IntakeFormData } from '@/components/app/intake-summary-form';
 import { TileLayout } from '@/components/app/tile-layout';
 import { cn } from '@/lib/shadcn/utils';
 import { Shimmer } from '../ai-elements/shimmer';
@@ -81,18 +83,55 @@ export function Fade({ top = false, bottom = false, className }: FadeProps) {
   );
 }
 
+const SESSION_ENDED_TOPIC = 'agent';
+const SESSION_ENDED_TYPE = 'session_ended';
+
 interface SessionViewProps {
   appConfig: AppConfig;
+  onSessionEnded?: (roomName: string, intake: IntakeFormData | null) => void;
 }
 
 export const SessionView = ({
   appConfig,
+  onSessionEnded,
   ...props
 }: React.ComponentProps<'section'> & SessionViewProps) => {
   const session = useSessionContext();
+  const room = useRoomContext();
   const { messages } = useSessionMessages(session);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const onSessionEndedRef = useRef(onSessionEnded);
+  onSessionEndedRef.current = onSessionEnded;
+
+  useEffect(() => {
+    if (!onSessionEndedRef.current) return;
+    const handler = (
+      payload: Uint8Array,
+      _participant: unknown,
+      _kind: unknown,
+      topic?: string
+    ) => {
+      if (topic !== SESSION_ENDED_TOPIC) return;
+      try {
+        const text = new TextDecoder().decode(payload);
+        const data = JSON.parse(text) as {
+          type?: string;
+          roomName?: string;
+          intake?: IntakeFormData | null;
+        };
+        if (data.type !== SESSION_ENDED_TYPE || typeof data.roomName !== 'string') return;
+        onSessionEndedRef.current?.(data.roomName, data.intake ?? null);
+        session.end();
+      } catch {
+        // ignore parse errors
+      }
+    };
+    room.on(RoomEvent.DataReceived, handler);
+    return () => {
+      room.off(RoomEvent.DataReceived, handler);
+    };
+  }, [room, session]);
 
   const controls: AgentControlBarControls = {
     leave: true,

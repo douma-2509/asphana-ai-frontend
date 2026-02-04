@@ -10,6 +10,7 @@ export interface AppConfig {
 
   logo: string;
   startButtonText: string;
+  translationButtonText?: string;
   accent?: string;
   logoDark?: string;
   accentDark?: string;
@@ -27,8 +28,8 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
   pageDescription: 'A voice agent built with LiveKit',
 
   supportsChatInput: true,
-  supportsVideoInput: true,
-  supportsScreenShare: true,
+  supportsVideoInput: false,
+  supportsScreenShare: false,
   isPreConnectBufferEnabled: true,
 
   logo: '/lk-logo.svg',
@@ -36,6 +37,7 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
   logoDark: '/lk-logo-dark.svg',
   accentDark: '#1fd5f9',
   startButtonText: 'Start call',
+  translationButtonText: 'Translation',
 
   // agent dispatch configuration
   agentName: process.env.AGENT_NAME ?? undefined,

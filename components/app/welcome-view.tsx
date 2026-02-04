@@ -21,14 +21,18 @@ function WelcomeImage() {
 
 interface WelcomeViewProps {
   startButtonText: string;
+  translationButtonText: string;
   onStartCall: () => void;
+  onStartTranslation: () => void;
   selectedLanguage: LanguageCode;
   onLanguageChange: (language: LanguageCode) => void;
 }
 
 export const WelcomeView = ({
   startButtonText,
+  translationButtonText,
   onStartCall,
+  onStartTranslation,
   selectedLanguage,
   onLanguageChange,
   ref,
@@ -42,14 +46,22 @@ export const WelcomeView = ({
           Chat live with your voice AI agent
         </p>
 
-        <div className="mt-6 w-72 space-y-4">
+        <div className="mt-6 flex w-64 flex-col items-stretch gap-3">
           <LanguageSelector value={selectedLanguage} onChange={onLanguageChange} />
           <Button
             size="lg"
             onClick={onStartCall}
-            className="mt-6 w-64 rounded-full font-mono text-xs font-bold tracking-wider uppercase"
+            className="rounded-full font-mono text-xs font-bold tracking-wider uppercase"
           >
             {startButtonText}
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={onStartTranslation}
+            className="rounded-full font-mono text-xs font-bold tracking-wider uppercase"
+          >
+            {translationButtonText}
           </Button>
         </div>
       </section>
