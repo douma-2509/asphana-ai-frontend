@@ -8,6 +8,7 @@ import type { IntakeFormData } from '@/components/app/intake-summary-form';
 import { PostCallView } from '@/components/app/post-call-view';
 import { SessionView } from '@/components/app/session-view';
 import { WelcomeView } from '@/components/app/welcome-view';
+import type { SessionMode } from './app';
 import { LanguageCode } from './language-selector';
 
 //const MotionWelcomeView = motion.create(WelcomeView);
@@ -31,8 +32,6 @@ const VIEW_MOTION_PROPS = {
     ease: 'linear',
   },
 };
-
-import type { SessionMode } from './app';
 
 interface ViewControllerProps {
   appConfig: AppConfig;

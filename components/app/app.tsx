@@ -60,7 +60,7 @@ export function App({ appConfig }: AppProps) {
       const metadata = JSON.stringify({ language, mode });
 
       const roomConfig =
-        options.agentName ?? appConfig.agentName
+        (options.agentName ?? appConfig.agentName)
           ? {
               agents: [
                 {
@@ -74,13 +74,19 @@ export function App({ appConfig }: AppProps) {
 
       const url =
         typeof process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT === 'string'
-          ? new URL(process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT, window.location.origin).toString()
+          ? new URL(
+              process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT,
+              window.location.origin
+            ).toString()
           : '/api/connection-details';
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
-      if (typeof process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT === 'string' && appConfig.sandboxId) {
+      if (
+        typeof process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT === 'string' &&
+        appConfig.sandboxId
+      ) {
         headers['X-Sandbox-Id'] = appConfig.sandboxId ?? '';
       }
 

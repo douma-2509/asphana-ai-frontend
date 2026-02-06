@@ -122,6 +122,13 @@ export const SessionView = ({
         };
         if (data.type !== SESSION_ENDED_TYPE || typeof data.roomName !== 'string') return;
         onSessionEndedRef.current?.(data.roomName, data.intake ?? null);
+        if (data.intake != null) {
+          fetch('/api/intake', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomName: data.roomName, intake: data.intake }),
+          }).catch((err) => console.error('Failed to persist intake:', err));
+        }
         session.end();
       } catch {
         // ignore parse errors

@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
+import type { IntakeFormData } from '@/components/app/intake-summary-form';
+import { sendIntakeNotification } from '@/lib/intake-email';
 import { getSupabaseServer } from '@/lib/supabase-server';
 
 const TABLE = 'patient_intakes';
+
+/**
+ * Email deduplication requires column patient_intakes.notification_sent_at.
+ * Run: frontend/supabase/migrations/20250201000000_add_notification_sent_at.sql
+ * (or add the column manually in Supabase dashboard)
+ */
 
 export const revalidate = 0;
 
@@ -73,6 +81,32 @@ export async function POST(req: Request) {
       console.error('Intake POST error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // Only send email once per room (avoids duplicate when both agent and frontend POST)
+    let shouldSendEmail = true;
+    const { data: row, error: selectErr } = await supabase
+      .from(TABLE)
+      .select('notification_sent_at')
+      .eq('room_name', roomName)
+      .limit(1)
+      .maybeSingle();
+
+    if (!selectErr && row != null && row.notification_sent_at != null) {
+      shouldSendEmail = false;
+    }
+
+    if (shouldSendEmail) {
+      try {
+        await sendIntakeNotification(intake as IntakeFormData, roomName);
+        await supabase
+          .from(TABLE)
+          .update({ notification_sent_at: new Date().toISOString() })
+          .eq('room_name', roomName);
+      } catch (emailErr) {
+        console.error('Intake email notification failed:', emailErr);
+      }
+    }
+
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof Error && e.message.includes('Missing Supabase')) {
