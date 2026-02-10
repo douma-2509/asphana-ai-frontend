@@ -10,11 +10,11 @@ const DEFAULT_FROM = 'Onboarding <onboarding@resend.dev>';
  */
 export async function sendIntakeNotification(
   intake: IntakeFormData,
-  roomName: string
+  roomName: string,
+  options?: { to?: string }
 ): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.INTAKE_NOTIFY_EMAIL;
-
+  const to = options?.to;
   if (!apiKey || !to) {
     console.warn('[intake-email] Skipping email: RESEND_API_KEY or INTAKE_NOTIFY_EMAIL is not set');
     return;

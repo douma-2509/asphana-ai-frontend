@@ -82,6 +82,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    let notifyEmail: string | null = null;
+    const { data: configRow } = await supabase
+      .from('notification_config')
+      .select('intake_notify_email')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (configRow?.intake_notify_email?.trim()) {
+      notifyEmail = configRow.intake_notify_email.trim();
+    }
+    if (!notifyEmail) {
+      console.log('No notification email configured');
+    } else {
+      console.log('Notification email configured:', notifyEmail);
+    }
+
     // Only send email once per room (avoids duplicate when both agent and frontend POST)
     let shouldSendEmail = true;
     const { data: row, error: selectErr } = await supabase
@@ -95,9 +111,9 @@ export async function POST(req: Request) {
       shouldSendEmail = false;
     }
 
-    if (shouldSendEmail) {
+    if (shouldSendEmail && notifyEmail) {
       try {
-        await sendIntakeNotification(intake as IntakeFormData, roomName);
+        await sendIntakeNotification(intake as IntakeFormData, roomName, { to: notifyEmail });
         await supabase
           .from(TABLE)
           .update({ notification_sent_at: new Date().toISOString() })
